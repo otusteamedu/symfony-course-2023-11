@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Domain\ValueObject\UserLogin;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -12,7 +13,6 @@ use Gedmo\Mapping\Annotation\Timestampable;
 use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Table(name: '`user`')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -27,9 +27,9 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
     #[JMS\Groups(['user-id-list'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 32, unique: true, nullable: false)]
+    #[ORM\Column(type: 'userLogin', length: 32, unique: true, nullable: false)]
     #[JMS\Groups(['video-user-info', 'elastica'])]
-    private string $login;
+    private UserLogin $login;
 
     #[ORM\Column(name: 'created_at', type: 'datetime', nullable: false)]
     #[Timestampable(on: 'create')]
@@ -144,12 +144,12 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
         $this->id = $id;
     }
 
-    public function getLogin(): string
+    public function getLogin(): UserLogin
     {
         return $this->login;
     }
 
-    public function setLogin(string $login): void
+    public function setLogin(UserLogin $login): void
     {
         $this->login = $login;
     }
@@ -232,7 +232,7 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
 
     public function getUserIdentifier(): string
     {
-        return $this->login;
+        return $this->login->getValue();
     }
 
     public function getToken(): ?string
@@ -262,25 +262,25 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
     {
         return [
             'id' => $this->id,
-            'login' => $this->login,
+            'login' => $this->login->getValue(),
             'password' => $this->password,
             'roles' => $this->getRoles(),
             'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
             'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),
             'tweets' => array_map(static fn(Tweet $tweet) => $tweet->toArray(), $this->tweets->toArray()),
             'followers' => array_map(
-                static fn(User $user) => ['id' => $user->getId(), 'login' => $user->getLogin()],
+                static fn(User $user) => ['id' => $user->getId(), 'login' => $user->getLogin()->getValue()],
                 $this->followers->toArray()
             ),
             'authors' => array_map(
-                static fn(User $user) => ['id' => $user->getLogin(), 'login' => $user->getLogin()],
+                static fn(User $user) => ['id' => $user->getLogin(), 'login' => $user->getLogin()->getValue()],
                 $this->authors->toArray()
             ),
             'subscriptionFollowers' => array_map(
                 static fn(Subscription $subscription) => [
                     'subscription_id' => $subscription->getId(),
                     'user_id' => $subscription->getFollower()->getId(),
-                    'login' => $subscription->getFollower()->getLogin(),
+                    'login' => $subscription->getFollower()->getLogin()->getValue(),
                 ],
                 $this->subscriptionFollowers->toArray()
             ),
@@ -288,7 +288,7 @@ class User implements HasMetaTimestampsInterface, UserInterface, PasswordAuthent
                 static fn(Subscription $subscription) => [
                     'subscription_id' => $subscription->getId(),
                     'user_id' => $subscription->getAuthor()->getId(),
-                    'login' => $subscription->getAuthor()->getLogin(),
+                    'login' => $subscription->getAuthor()->getLogin()->getValue(),
                 ],
                 $this->subscriptionAuthors->toArray()
             ),
