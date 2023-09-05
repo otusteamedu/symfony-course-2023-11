@@ -13,6 +13,7 @@ use App\Controller\Api\CreateUser\v5\Output\UserIsCreatedDTO;
 use OpenApi\Attributes as OA;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\HandledStamp;
 
 class CreateUserAction extends AbstractFOSRestController
 {
@@ -40,8 +41,11 @@ class CreateUserAction extends AbstractFOSRestController
     #[Rest\Post(path: '/api/v5/users')]
     public function saveUserAction(#[MapRequestPayload] CreateUserDTO $request): Response
     {
-        $this->messageBus->dispatch(CreateUserCommand::createFromRequest($request));
+        $envelope = $this->messageBus->dispatch(CreateUserCommand::createFromRequest($request));
+        /** @var HandledStamp|null $handledStamp */
+        $handledStamp = $envelope->last(HandledStamp::class);
+        [$data, $code] = ($handledStamp?->getResult() === null) ? [['success' => false], 400] : [['userId' => $handledStamp?->getResult()], 200];
 
-        return $this->handleView($this->view(['success' => true]));
+        return $this->handleView($this->view($data, $code));
     }
 }
