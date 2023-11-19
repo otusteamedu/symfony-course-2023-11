@@ -9,7 +9,8 @@ use App\Event\CreateUserEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
+use StatsdBundle\Client\StatsdAPIClient;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class CreateUserManager implements CreateUserManagerInterface
@@ -18,12 +19,14 @@ class CreateUserManager implements CreateUserManagerInterface
         private readonly EntityManagerInterface $entityManager,
         private readonly SerializerInterface $serializer,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly EventDispatcherInterface $eventDispatcher
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly StatsdAPIClient $statsdAPIClient
     ) {
     }
 
     public function saveUser(CreateUserDTO $saveUserDTO): UserIsCreatedDTO
     {
+        $this->statsdAPIClient->increment('save_user_v5_attempt');
         $user = new User();
         $user->setLogin($saveUserDTO->login);
         $user->setPassword($this->userPasswordHasher->hashPassword($user, $saveUserDTO->password));
