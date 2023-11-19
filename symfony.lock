@@ -1,4 +1,7 @@
 {
+    "aleksandr-yask/sf-08-statsd-bundle": {
+        "version": "dev-main"
+    },
     "codeception/codeception": {
         "version": "5.1",
         "recipe": {
@@ -159,6 +162,9 @@
             "phpunit.xml.dist",
             "tests/bootstrap.php"
         ]
+    },
+    "raptor-mvk/statsd-bundle": {
+        "version": "dev-master"
     },
     "sensio/framework-extra-bundle": {
         "version": "6.2",
