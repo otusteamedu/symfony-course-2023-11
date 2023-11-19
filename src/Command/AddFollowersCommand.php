@@ -46,8 +46,6 @@ final class AddFollowersCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        dump('started');
-        sleep(100);
         $authorId = (int)$input->getArgument('authorId');
         $user = $this->userManager->findUser($authorId);
         if ($user === null) {

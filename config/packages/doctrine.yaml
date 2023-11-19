@@ -21,6 +21,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+            FeedBundle:
+                is_bundle: true
+                type: attribute
+                dir: 'Entity'
+                prefix: 'FeedBundle\Entity'
+                alias: FeedBundle
         metadata_cache_driver:
             type: pool
             pool: doctrine.system_cache_pool
