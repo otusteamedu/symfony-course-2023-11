@@ -283,6 +283,40 @@
     ```
 3. Обновляем страницу в браузере, видим, что в таблице первой колонкой стала колонка "Телефон"
 
+## Добавляем собственные расширения
+1. Создаем папку `src/Extension`
+2. В ней создаем файл MyExtension.php
+3. Наследуем его от `Twig\Extension\AbstractExtension`
+4. Проверяем появились ли фильтры и функции в списке с помощью `bin/console debug:twig` (внутри контейнера)
+```php
+class MyExtension extends AbstractExtension
+{
+    public function getFilters()
+    {
+        return [
+            new TwigFilter('my_filter', [$this, 'myFilter']),
+        ];
+    }
+
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction('my_function', [$this, 'myFunction']),
+        ];
+    }
+
+    public function myFilter()
+    {
+        return 'myFilter myFilter';
+    }
+
+    public function myFunction()
+    {
+        return 'myFunction myFunction';
+    }
+}
+```
+
 ## Устанавливаем Webpack Encore и подключаем таблицы стилей JavaScript в шаблон
 
 1. Устанавливаем Webpack Encore командой `composer require symfony/webpack-encore-bundle`
