@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Service;
 
 use App\Entity\User;
-use App\Managers\SubscriptionManager;
-use App\Managers\TweetManager;
-use App\Managers\UserManager;
+use App\Manager\SubscriptionManager;
+use App\Manager\TweetManager;
+use App\Manager\UserManager;
 
 class UserBuilderService
 {

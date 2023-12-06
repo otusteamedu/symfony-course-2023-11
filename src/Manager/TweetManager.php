@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Managers;
+namespace App\Manager;
 
 use App\Entity\Tweet;
 use App\Entity\User;
