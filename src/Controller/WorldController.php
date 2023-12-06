@@ -2,14 +2,22 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Managers\UserManager;
+use App\Services\UserBuilderService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
-class WorldController
+class WorldController extends AbstractController
 {
-    private int $foo;
 
-    public function hello(): Response
+
+    public function hello(UserManager $userManager): Response
     {
-        return new Response('<html><body><h1><b>Hello,</b> <i>world</i>!!!!!</h1></body></html>');
+        $users = $userManager->findUsersByLogin('Ivan Ivanov');
+
+        return $this->json(array_map(static fn(User $user) => $user->toArray(), $users));
     }
+
+
 }
