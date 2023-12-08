@@ -10,10 +10,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class WorldController extends AbstractController
 {
-    public function hello(UserManager $userManager): Response
-    {
-        $users = $userManager->findUsersByLogin('Ivan Ivanov');
+    public function __construct(
+        private readonly UserManager $userManager,
+        private readonly UserBuilderService $userBuilderService
+    ) {
+    }
 
-        return $this->json(array_map(static fn(User $user) => $user->toArray(), $users));
+    public function hello(): Response
+    {
+        $user = $this->userBuilderService->createUserWithTweets(
+            'Charles Dickens',
+            ['Oliver Twist', 'The Christmas Carol']
+        );
+        $userData = $this->userManager->findByNative($user->getId());
+
+        return $this->json($userData);
     }
 }
