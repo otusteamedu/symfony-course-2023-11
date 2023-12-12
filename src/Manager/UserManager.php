@@ -5,9 +5,11 @@ namespace App\Manager;
 use App\Entity\User;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\AbstractQuery;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\NonUniqueResultException;
 
 class UserManager
 {
@@ -69,27 +71,6 @@ class UserManager
         return $repository->matching($criteria)->toArray();
     }
 
-    /**
-     * @return User[]
-     */
-    public function getUserList(): array
-    {
-        return [
-            new User('Иван', 'Сергеевич', 'Сапогов', '+71112223344'),
-            new User('Фёдор', 'Викторович', 'Лаптев', '+72223334455'),
-            new User('Пётр', 'Михайлович', 'Стеклов', '+73334445566'),
-            new User('Игнат', 'Глебович', 'Лопухов', '+74445556677'),
-        ];
-    }
-
-    public function getUsersListVue(): array
-    {
-        return array_map(
-            static fn(User $user) => $user->toArray(),
-            $this->getUserList()
-        );
-    }
-
     public function updateUserLogin(int $userId, string $login): ?User
     {
         $user = $this->findUser($userId);
@@ -105,10 +86,10 @@ class UserManager
     public function findUsersWithQueryBuilder(string $login): array
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
-
+        // SELECT u.* FROM `user` u WHERE u.login LIKE :userLogin
         $queryBuilder->select('u')
             ->from(User::class, 'u')
-            ->where($queryBuilder->expr()->like('u.login', ':userLogin'))
+            ->andWhere($queryBuilder->expr()->like('u.login',':userLogin'))
             ->setParameter('userLogin', "%$login%");
 
         return $queryBuilder->getQuery()->getResult();
@@ -117,18 +98,18 @@ class UserManager
     public function updateUserLoginWithQueryBuilder(int $userId, string $login): void
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
-
-        $queryBuilder->update(User::class, 'u')
+        $queryBuilder->update(User::class,'u')
             ->set('u.login', ':userLogin')
             ->where($queryBuilder->expr()->eq('u.id', ':userId'))
-            ->setParameters([
-                'userId' => $userId,
-                'userLogin' => $login
-            ]);
+            ->setParameter('userId', $userId)
+            ->setParameter('userLogin', $login);
 
         $queryBuilder->getQuery()->execute();
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function updateUserLoginWithDBALQueryBuilder(int $userId, string $login): void
     {
         $queryBuilder = $this->entityManager->getConnection()->createQueryBuilder();
@@ -141,7 +122,10 @@ class UserManager
         $queryBuilder->executeStatement();
     }
 
-    public function findUserWithTweetsWithQueryBuilder(int $userId): array
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findUserWithTweetsWithQueryBuilder(int $userId): ?User
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
         $queryBuilder->select('u', 't')
@@ -150,7 +134,7 @@ class UserManager
             ->where($queryBuilder->expr()->eq('u.id', ':userId'))
             ->setParameter('userId', $userId);
 
-        return $queryBuilder->getQuery()->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
+        return $queryBuilder->getQuery()->getOneOrNullResult();
     }
 
     /**
@@ -165,7 +149,33 @@ class UserManager
             ->where($queryBuilder->expr()->eq('u.id', ':userId'))
             ->setParameter('userId', $userId);
 
-        return $queryBuilder->executeQuery()->fetchAllAssociative();
+        return $queryBuilder->executeQuery()->fetchAllNumeric();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function getUsers(int $page, int $perPage): array
+    {
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->entityManager->getRepository(User::class);
+
+        return $userRepository->getUsers($page, $perPage);
+    }
+
+    public function deleteUser(int $userId): bool
+    {
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->entityManager->getRepository(User::class);
+        /** @var User $user */
+        $user = $userRepository->find($userId);
+        if ($user === null) {
+            return false;
+        }
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
+
+        return true;
     }
 
     public function findByNative(int $userId): array
