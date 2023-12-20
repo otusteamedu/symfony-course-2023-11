@@ -3,7 +3,10 @@
 namespace App\Controller\Api\v1;
 
 use App\Entity\User;
+use App\Event\CreateUserEvent;
+use App\Exception\DeprecatedApiException;
 use App\Manager\UserManager;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,15 +19,19 @@ class UserController extends AbstractController
     private const DEFAULT_PAGE = 0;
     private const DEFAULT_PER_PAGE = 20;
 
-    public function __construct(private readonly UserManager $userManager)
-    {
+    public function __construct(
+        private readonly UserManager $userManager,
+        private readonly EventDispatcherInterface $dispatcher,
+    ) {
     }
 
     #[Route(path: '', methods: ['POST'])]
     public function saveUserAction(Request $request): Response
     {
+        throw new DeprecatedApiException('This API method is deprecated');
+
         $login = $request->request->get('login');
-        $userId = $this->userManager->create($login);
+        $userId = $this->userManager->saveUser($login);
         [$data, $code] = $userId === null ?
             [['success' => false], Response::HTTP_BAD_REQUEST] :
             [['success' => true, 'userId' => $userId], Response::HTTP_OK];
@@ -68,5 +75,13 @@ class UserController extends AbstractController
         $result = $this->userManager->deleteUserById($id);
 
         return new JsonResponse(['success' => $result], $result ? Response::HTTP_OK : Response::HTTP_NOT_FOUND);
+    }
+
+    #[Route(path: '/async', methods: ['POST'])]
+    public function saveUserAsyncAction(Request $request): Response
+    {
+        $this->dispatcher->dispatch(new CreateUserEvent($request->request->get('login')));
+
+        return new JsonResponse(['success' => true], Response::HTTP_ACCEPTED);
     }
 }
