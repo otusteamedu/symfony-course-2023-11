@@ -214,4 +214,12 @@ class User implements HasMetaTimestampsInterface
             ),
         ];
     }
+
+    /**
+     * @return User[]
+     */
+    public function getFollowers(): array
+    {
+        return $this->followers->toArray();
+    }
 }
