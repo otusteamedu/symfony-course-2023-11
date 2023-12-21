@@ -2,6 +2,7 @@
 
 namespace App\Manager;
 
+use App\DTO\ManageUserDTO;
 use App\Entity\User;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\AbstractQuery;
@@ -201,5 +202,17 @@ class UserManager
         $stmt = $this->entityManager->getConnection()->prepare('select * from "tweet" where id = ?');
         $stmt->bindValue(1, $userId);
         return $stmt->executeQuery()->fetchAllAssociative();
+    }
+
+    public function saveUserFromDTO(User $user, ManageUserDTO $manageUserDTO): ?int
+    {
+        $user->setLogin($manageUserDTO->login);
+        $user->setPassword($manageUserDTO->password);
+        $user->setAge($manageUserDTO->age);
+        $user->setIsActive($manageUserDTO->isActive);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user->getId();
     }
 }

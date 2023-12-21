@@ -2,6 +2,7 @@
 
 namespace App\Form\Type;
 
+use App\DTO\ManageUserDTO;
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -42,11 +43,11 @@ class UserType extends AbstractType
             ->add('submit', SubmitType::class);
     }
 
-    public function configureOptions(OptionsResolver $resolver): void
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
-            'empty_data' => new User(),
+            'data_class' => ManageUserDTO::class,
+            'empty_data' => new ManageUserDTO(),
             'isNew' => false,
         ]);
     }
