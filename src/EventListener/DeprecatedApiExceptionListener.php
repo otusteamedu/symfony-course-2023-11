@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 #[AsEventListener(event: 'kernel.exception', priority: 20)]
-#[AsEventListener(event: 'kernel.exception', method: 'customHandler', priority: 10)]
+#[AsEventListener(event: 'kernel.exception', method: 'customHandler', priority: -100)]
 class DeprecatedApiExceptionListener
 {
     public function onKernelException(ExceptionEvent $event): void
@@ -16,24 +16,27 @@ class DeprecatedApiExceptionListener
         $exception = $event->getThrowable();
 
         if ($exception instanceof DeprecatedApiException) {
-            var_dump('first');
+            $newException = new DeprecatedApiException(
+                \sprintf(
+                    '%s %s',
+                    __METHOD__,
+                    $exception->getMessage()
+                ),
+                Response::HTTP_GONE
+            );
 
-            $response = new Response();
-            $response->setContent($exception->getMessage());
-            $response->setStatusCode(Response::HTTP_GONE);
-            $event->setResponse($response);
+            $event->setThrowable($newException);
         }
     }
+
     public function customHandler(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
 
         if ($exception instanceof DeprecatedApiException) {
-            var_dump('second');
-
             $response = new Response();
             $response->setContent($exception->getMessage());
-            $response->setStatusCode(Response::HTTP_GONE);
+            $response->setStatusCode($exception->getCode());
             $event->setResponse($response);
         }
     }
