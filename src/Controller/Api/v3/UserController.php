@@ -50,7 +50,7 @@ class UserController extends AbstractController
     public function deleteUserAction(Request $request): Response
     {
         $userId = $request->query->get('userId');
-        $user = $this->userManager->getUserById($userId);
+        $user = $this->userManager->findUser($userId);
         if (!$this->authorizationChecker->isGranted(UserVoter::DELETE, $user)) {
             return new JsonResponse('Access denied', Response::HTTP_FORBIDDEN);
         }
