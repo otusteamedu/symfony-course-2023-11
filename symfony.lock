@@ -9,12 +9,12 @@
         }
     },
     "doctrine/doctrine-bundle": {
-        "version": "2.11",
+        "version": "2.10",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "2.10",
-            "ref": "0db4b12b5df45f5122213b4ecd18733ab7fa7d53"
+            "ref": "e025a6cb69b195970543820b2f18ad21724473fa"
         },
         "files": [
             "config/packages/doctrine.yaml",
@@ -23,7 +23,7 @@
         ]
     },
     "doctrine/doctrine-migrations-bundle": {
-        "version": "3.3",
+        "version": "3.2",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
@@ -48,7 +48,7 @@
         ]
     },
     "stof/doctrine-extensions-bundle": {
-        "version": "1.9",
+        "version": "1.8",
         "recipe": {
             "repo": "github.com/symfony/recipes-contrib",
             "branch": "main",
@@ -72,7 +72,7 @@
         ]
     },
     "symfony/flex": {
-        "version": "2.4",
+        "version": "2.3",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
@@ -102,6 +102,15 @@
             "src/Kernel.php"
         ]
     },
+    "symfony/maker-bundle": {
+        "version": "1.51",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
+        }
+    },
     "symfony/routing": {
         "version": "6.3",
         "recipe": {
@@ -113,6 +122,32 @@
         "files": [
             "config/packages/routing.yaml",
             "config/routes.yaml"
+        ]
+    },
+    "symfony/security-bundle": {
+        "version": "6.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "6.0",
+            "ref": "8a5b112826f7d3d5b07027f93786ae11a1c7de48"
+        },
+        "files": [
+            "config/packages/security.yaml"
+        ]
+    },
+    "symfony/stimulus-bundle": {
+        "version": "2.11",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.9",
+            "ref": "05c45071c7ecacc1e48f94bc43c1f8d4405fb2b2"
+        },
+        "files": [
+            "assets/bootstrap.js",
+            "assets/controllers.json",
+            "assets/controllers/hello_controller.js"
         ]
     },
     "symfony/twig-bundle": {
@@ -128,6 +163,18 @@
             "templates/base.html.twig"
         ]
     },
+    "symfony/ux-vue": {
+        "version": "2.11",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.9",
+            "ref": "7a6b5e211acc7b10b7190e704b40f6d2bca01adf"
+        },
+        "files": [
+            "assets/vue/controllers/Hello.vue"
+        ]
+    },
     "symfony/validator": {
         "version": "6.3",
         "recipe": {
@@ -141,7 +188,7 @@
         ]
     },
     "symfony/webpack-encore-bundle": {
-        "version": "2.1",
+        "version": "2.0",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
