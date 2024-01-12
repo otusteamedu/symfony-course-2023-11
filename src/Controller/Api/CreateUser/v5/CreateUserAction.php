@@ -8,13 +8,12 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 class CreateUserAction extends AbstractFOSRestController
 {
     use ErrorResponseTrait;
 
-    public function __construct(private readonly CreateUserManager $saveUserManager)
+    public function __construct(private readonly CreateUserManagerInterface $saveUserManager)
     {
     }
 

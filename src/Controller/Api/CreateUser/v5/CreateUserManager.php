@@ -5,17 +5,20 @@ namespace App\Controller\Api\CreateUser\v5;
 use App\Controller\Api\CreateUser\v5\Input\CreateUserDTO;
 use App\Controller\Api\CreateUser\v5\Output\UserIsCreatedDTO;
 use App\Entity\User;
+use App\Event\CreateUserEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class CreateUserManager
+class CreateUserManager implements CreateUserManagerInterface
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly SerializerInterface $serializer,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly EventDispatcherInterface $eventDispatcher
     ) {
     }
 
@@ -33,6 +36,8 @@ class CreateUserManager
         $result = new UserIsCreatedDTO();
         $context = (new SerializationContext())->setGroups(['video-user-info', 'user-id-list']);
         $result->loadFromJsonString($this->serializer->serialize($user, 'json', $context));
+
+        $this->eventDispatcher->dispatch(new CreateUserEvent($user->getLogin()));
 
         return $result;
     }
