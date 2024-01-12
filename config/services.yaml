@@ -83,3 +83,7 @@ services:
         calls:
             - [ setTag, [ 'li' ] ]
         tags: [ 'app.formatter_service' ]
+
+    App\Service\AuthService:
+        arguments:
+            $tokenTTL: '%env(JWT_TTL_SEC)%'
