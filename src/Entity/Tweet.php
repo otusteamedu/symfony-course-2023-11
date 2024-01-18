@@ -2,12 +2,15 @@
 
 namespace App\Entity;
 
+use App\Repository\TweetRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation\Timestampable;
+
 use JetBrains\PhpStorm\ArrayShape;
 
 #[ORM\Table(name: 'tweet')]
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: TweetRepository::class)]
 #[ORM\Index(columns: ['author_id'], name: 'tweet__author_id__ind')]
 #[ORM\UniqueConstraint('unique_smth', ['author_id', 'text'])]
 class Tweet
@@ -25,9 +28,11 @@ class Tweet
     private string $text;
 
     #[ORM\Column(name: 'created_at', type: 'datetime', nullable: false)]
+    #[Timestampable(on: 'create')]
     private DateTime $createdAt;
 
     #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: false)]
+    #[Timestampable(on: 'update')]
     private DateTime $updatedAt;
 
     public function getId(): int
@@ -76,12 +81,12 @@ class Tweet
         $this->updatedAt = new DateTime();
     }
 
-    #[ArrayShape(['id' => 'int|null', 'login' => 'string', 'createdAt' => 'string', 'updatedAt' => 'string'])]
     public function toArray(): array
     {
         return [
             'id' => $this->id,
             'login' => $this->author->getLogin(),
+            'text' => $this->text,
             'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
             'updatedAt' => $this->updatedAt->format('Y-m-d H:i:s'),
         ];
