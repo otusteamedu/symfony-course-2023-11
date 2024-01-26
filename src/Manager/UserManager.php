@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\NonUniqueResultException;
+use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager
@@ -18,6 +19,7 @@ class UserManager
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly PaginatedFinderInterface $finder,
     )
     {
     }
@@ -255,5 +257,19 @@ class UserManager
         $user = $userRepository->findOneBy(['token' => $token]);
 
         return $user;
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findUserByQuery(string $query, int $perPage, int $page): array
+    {
+        $paginatedResult = $this->finder->findPaginated($query);
+        $paginatedResult->setMaxPerPage($perPage);
+        $paginatedResult->setCurrentPage($page);
+        $result = [];
+        array_push($result, ...$paginatedResult->getCurrentPageResults());
+
+        return array_map(static fn (User $user) => $user->toArray(), $result);
     }
 }
