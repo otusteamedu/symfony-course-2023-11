@@ -11,7 +11,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\NonUniqueResultException;
+use Elastica\Aggregation\Terms;
+use Elastica\Query;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
+use FOS\ElasticaBundle\Paginator\FantaPaginatorAdapter;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserManager
@@ -271,5 +274,21 @@ class UserManager
         array_push($result, ...$paginatedResult->getCurrentPageResults());
 
         return array_map(static fn (User $user) => $user->toArray(), $result);
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findUserWithAggregation(string $field): array
+    {
+        $aggregation = new Terms('notifications');
+        $aggregation->setField($field);
+        $query = new Query();
+        $query->addAggregation($aggregation);
+        $paginatedResult = $this->finder->findPaginated($query);
+        /** @var FantaPaginatorAdapter $adapter */
+        $adapter = $paginatedResult->getAdapter();
+
+        return $adapter->getAggregations();
     }
 }
