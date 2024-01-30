@@ -100,7 +100,11 @@ services:
             - my_app
 
     App\Controller\Api\CreateUser\v5\CreateUserAction:
-        arguments: [ '@App\Controller\Api\CreateUser\v5\CreateUserManager' ]
+        arguments: [ '@App\Controller\Api\CreateUser\v5\CreateUserManagerLoggerDecorator' ]
+
+    App\Controller\Api\CreateUser\v5\CreateUserManagerLoggerDecorator:
+        decorates: App\Controller\Api\CreateUser\v5\CreateUserManager
+        arguments: [ '@.inner' ]
 
     redis_client:
         class: Redis
@@ -174,3 +178,7 @@ services:
         class: App\Consumer\UpdateFeed\Consumer
         arguments:
             $key: 'update_feed_9'
+
+    App\Manager\UserManager:
+        arguments:
+            $finder: '@fos_elastica.finder.user'
