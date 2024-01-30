@@ -1,0 +1,3 @@
+<testsuite name="Service Test Suite">
+    <directory>.</directory>
+</testsuite>

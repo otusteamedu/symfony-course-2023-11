@@ -1,0 +1,3 @@
+<testsuite name="Entity Test Suite">
+    <directory>.</directory>
+</testsuite>
