@@ -45,14 +45,9 @@ final class AddFollowersCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$this->lock()) {
-            $output->writeln('<info>Command is already running.</info>');
-
-            return self::SUCCESS;
-        }
-
         $authorId = (int)$input->getArgument('authorId');
         $user = $this->userManager->findUser($authorId);
+
         if ($user === null) {
             $output->write("<error>User with ID $authorId doesn't exist</error>\n");
 
@@ -66,39 +61,9 @@ final class AddFollowersCommand extends Command
             return self::FAILURE;
         }
 
-        $loginPrefix = $input->getOption('login') ?? self::DEFAULT_LOGIN_PREFIX;
-        $progressBar = new ProgressBar($output, $count);
-        $progressBar->start();
-        $createdFollowers = 0;
-        for ($i = 0; $i < $count; $i++) {
-            $login = $loginPrefix.$authorId."_#$i";
-            $phone = '+'.str_pad((string)abs(crc32($login)), 10, '0');
-            $email = "$login@gmail.com";
-            $preferred = random_int(0, 1) === 1 ? User::EMAIL_NOTIFICATION : User::SMS_NOTIFICATION;
-            $followerId = $this->userManager->saveUserFromDTO(
-                new User(),
-                new ManageUserDTO(
-                    $login,
-                    $login,
-                    $i,
-                    true,
-                    [],
-                    [],
-                    $phone,
-                    $email,
-                    $preferred
-                )
-            );
-
-            if ($followerId !== null) {
-                $this->subscriptionService->subscribe($user->getId(), $followerId);
-                $createdFollowers++;
-                usleep(100000);
-                $progressBar->advance();
-            }
-        }
-        $output->write("<info>$createdFollowers followers were created</info>\n");
-        $progressBar->finish();
+        $login = $input->getOption('login') ?? self::DEFAULT_LOGIN_PREFIX;
+        $result = $this->subscriptionService->addFollowers($user, $login.$authorId, $count);
+        $output->write("<info>$result followers were created</info>\n");
 
         return self::SUCCESS;
     }
