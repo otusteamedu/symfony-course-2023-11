@@ -581,3 +581,115 @@
     }
     ```
 4. Запускаем тесты командой `vendor/bin/phpunit tests/unit/Command/AddFollowersCommandTest.php`
+
+## Делаем обработку сигналов
+1. Исправляем класс `App\Command\AddFollowersCommand`
+   ```php
+      #[AsCommand(
+         name: self::FOLLOWERS_ADD_COMMAND_NAME,
+         description: 'Adds followers to author',
+         hidden: true,
+      )]
+      final class AddFollowersCommand extends Command implements SignalableCommandInterface
+      {
+          use LockableTrait;
+      
+          public const FOLLOWERS_ADD_COMMAND_NAME = 'followers:add';
+          private const DEFAULT_FOLLOWERS = 10;
+          private const DEFAULT_LOGIN_PREFIX = 'cli_follower';
+      
+          public function __construct(
+              private readonly UserManager $userManager,
+              private readonly SubscriptionService $subscriptionService
+          ) {
+              parent::__construct();
+          }
+      
+          protected function configure(): void
+          {
+              $this
+                  ->setDescription('Adds followers to author')
+                  ->addArgument('authorId', InputArgument::REQUIRED, 'ID of author')
+                  ->addOption('login', 'l', InputOption::VALUE_REQUIRED, 'Follower login prefix');
+          }
+      
+          protected function execute(InputInterface $input, OutputInterface $output): int
+          {
+              dump('started');
+              sleep(100);
+              $authorId = (int)$input->getArgument('authorId');
+              $user = $this->userManager->findUser($authorId);
+              if ($user === null) {
+                  $output->write("<error>User with ID $authorId doesn't exist</error>\n");
+      
+                  return self::FAILURE;
+              }
+              $helper = $this->getHelper('question');
+              $question = new Question('How many followers you want to add?', self::DEFAULT_FOLLOWERS);
+              $count = (int)$helper->ask($input, $output, $question);
+      
+              if ($count < 0) {
+                  $output->write("<error>Count should be positive integer</error>\n");
+      
+                  return self::FAILURE;
+              }
+      
+              $login = $input->getOption('login') ?? self::DEFAULT_LOGIN_PREFIX;
+              $result = $this->subscriptionService->addFollowers($user, $login.$authorId, $count);
+              $output->write("<info>$result followers were created</info>\n");
+      
+              return self::SUCCESS;
+          }
+      
+          public function getSubscribedSignals(): array
+          {
+              return [
+                  SIGINT,
+                  SIGTERM,
+              ];
+          }
+      
+          public function handleSignal(int $signal, int|false $previousExitCode = 0): int|false
+          {
+              dump($signal, 'signal');
+      
+              return false; // не завершать
+          }
+      }
+   ```
+2. Вызываем `php bin/console followers:add 1 -lmy_login`
+3. Нажимаем ctrl+c
+4. Видим, что программа продолжила выполнение
+
+### Обработка событий через евенты
+1. Создаем класс `App\EventSubscriber\AddFollowersSignalSubscriber`
+   ```php
+      <?php
+
+      namespace App\EventSubscriber;
+      
+      use Symfony\Component\Console\ConsoleEvents;
+      use Symfony\Component\Console\Event\ConsoleSignalEvent;
+      use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+      
+      class AddFollowersSignalSubscriber implements EventSubscriberInterface
+      {
+          public static function getSubscribedEvents(): array
+          {
+             return [
+               ConsoleEvents::SIGNAL => 'handleSignal',
+             ];
+          }
+      
+          public function handleSignal(ConsoleSignalEvent $event): void
+          {
+              $signal = $event->getHandlingSignal();
+              dump($signal, 'event signal');
+      
+              $event->setExitCode(0);
+          }
+      }
+   ```
+2. Убираем имплементацию SignalableCommandInterface из команды и убираем методы getSubscribedSignals и handleSignal
+3. Запускаем команду и жмем ctrl+c
+4. Видим новое сообщение
