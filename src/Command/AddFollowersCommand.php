@@ -9,7 +9,7 @@ use App\Manager\UserManager;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
-use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Command\SignalableCommandInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -21,7 +21,7 @@ use Symfony\Component\Console\Question\Question;
     description: 'Adds followers to author',
     hidden: true,
 )]
-final class AddFollowersCommand extends Command
+final class AddFollowersCommand extends Command implements SignalableCommandInterface
 {
     use LockableTrait;
 
@@ -46,6 +46,8 @@ final class AddFollowersCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        dump('started');
+        sleep(100);
         $authorId = (int)$input->getArgument('authorId');
         $user = $this->userManager->findUser($authorId);
         if ($user === null) {
@@ -68,5 +70,20 @@ final class AddFollowersCommand extends Command
         $output->write("<info>$result followers were created</info>\n");
 
         return self::SUCCESS;
+    }
+
+    public function getSubscribedSignals(): array
+    {
+        return [
+            SIGINT,
+            SIGTERM,
+        ];
+    }
+
+    public function handleSignal(int $signal, int|false $previousExitCode = 0): int|false
+    {
+        dump($signal, 'signal');
+
+        return false; // не завершать
     }
 }
