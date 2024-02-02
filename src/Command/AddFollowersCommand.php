@@ -21,7 +21,7 @@ use Symfony\Component\Console\Question\Question;
     description: 'Adds followers to author',
     hidden: true,
 )]
-final class AddFollowersCommand extends Command implements SignalableCommandInterface
+final class AddFollowersCommand extends Command
 {
     use LockableTrait;
 
@@ -70,20 +70,5 @@ final class AddFollowersCommand extends Command implements SignalableCommandInte
         $output->write("<info>$result followers were created</info>\n");
 
         return self::SUCCESS;
-    }
-
-    public function getSubscribedSignals(): array
-    {
-        return [
-            SIGINT,
-            SIGTERM,
-        ];
-    }
-
-    public function handleSignal(int $signal, int|false $previousExitCode = 0): int|false
-    {
-        dump($signal, 'signal');
-
-        return false; // не завершать
     }
 }
