@@ -29,6 +29,7 @@
         "symfony/form": "6.3.*",
         "symfony/framework-bundle": "6.3.*",
         "symfony/http-client": "6.3.*",
+        "symfony/lock": "6.3.*",
         "symfony/maker-bundle": "^1.51",
         "symfony/monolog-bundle": "^3.10",
         "symfony/phpunit-bridge": "^7.0",
@@ -41,7 +42,8 @@
         "symfony/ux-vue": "^2.11",
         "symfony/validator": "6.3.*",
         "symfony/webpack-encore-bundle": "^2.0",
-        "symfony/yaml": "6.3.*"
+        "symfony/yaml": "6.3.*",
+        "ext-pcntl": "*"
     },
     "config": {
         "allow-plugins": {
