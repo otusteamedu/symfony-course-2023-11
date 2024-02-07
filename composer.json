@@ -7,6 +7,7 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-pcntl": "*",
         "doctrine/doctrine-bundle": "*",
         "doctrine/doctrine-fixtures-bundle": "^3.5",
         "doctrine/doctrine-migrations-bundle": "*",
@@ -16,6 +17,7 @@
         "jms/serializer-bundle": "^5.4",
         "lexik/jwt-authentication-bundle": "^2.20",
         "mockery/mockery": "^1.6",
+        "nelmio/api-doc-bundle": "^4.19",
         "php-amqplib/rabbitmq-bundle": "^2.14",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpstan/phpdoc-parser": "^1.25",
@@ -42,8 +44,7 @@
         "symfony/ux-vue": "^2.11",
         "symfony/validator": "6.3.*",
         "symfony/webpack-encore-bundle": "^2.0",
-        "symfony/yaml": "6.3.*",
-        "ext-pcntl": "*"
+        "symfony/yaml": "6.3.*"
     },
     "config": {
         "allow-plugins": {
