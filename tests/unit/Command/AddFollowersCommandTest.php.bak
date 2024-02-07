@@ -1,0 +1,48 @@
+<?php
+
+namespace CodeceptionUnitTests\Command;
+
+use App\Entity\User;
+use App\Tests\Support\FunctionalTester;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Tester\CommandTester;
+use UnitTests\FixturedTestCase;
+use UnitTests\Fixtures\MultipleUsersFixture;
+
+class AddFollowersCommandTest extends FixturedTestCase
+{
+    private const COMMAND = 'followers:add';
+
+    /** @var Application */
+    private static $application;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        self::$application = new Application(self::$kernel);
+        $this->addFixture(new MultipleUsersFixture());
+    }
+
+    public function executeDataProvider(): array
+    {
+        return [
+            'positive' => [20, "20 followers were created\n"],
+            'zero' => [0, "0 followers were created\n"],
+            'default' => [null, "100 followers were created\n"],
+            'negative' => [-1, "Count should be positive integer\n"],
+        ];
+    }
+
+    /**
+     * @dataProvider executeDataProvider
+     */
+    public function testExecuteReturnsResult(FunctionalTester $I, Example $example): void
+    {
+        $author = $I->have(User::class);
+        $params = ['authorId' => $author->getId()];
+        $inputs = $example['followersCount'] === null ? ["\n"] : [$example['followersCount']."\n"];
+        $output = $I->runSymfonyConsoleCommand(self::COMMAND, $params, $inputs, $example['exitCode']);
+        $I->assertStringEndsWith($example['expected'], $output);
+    }
+}
