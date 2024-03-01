@@ -111,7 +111,8 @@
         "codeception/module-phpbrowser": "*",
         "codeception/module-rest": "*",
         "codeception/module-symfony": "*",
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^10.5",
+        "qossmic/deptrac-shim": "^1.0"
     },
     "repositories": [
         {
