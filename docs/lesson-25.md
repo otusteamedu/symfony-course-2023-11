@@ -8,7 +8,7 @@
     
     # Install dev dependencies
     RUN apk update \
-        && apk upgrade --available \
+        && apk upgrade --available \F
         && apk add --virtual build-deps \
             autoconf \
             build-base \
